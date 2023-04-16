@@ -6,8 +6,9 @@ from pathlib import Path
 from loguru import logger
 from concurrent.futures import ProcessPoolExecutor
 
-def get_ticker_mkt_data(tick):
+def get_ticker_mkt_data(args):
     try:
+        path, start_date, end_date, tick = args
         tick_obj = yf.Ticker(tick)
         hist = tick_obj.history(period="5Y")
         hist['ticker'] = tick
@@ -24,17 +25,18 @@ def get_ticker_mkt_data(tick):
         data_share = data_share.dropna()
         data_share = data_share.loc[start_date:end_date]
         
-        parent = Path('./data/mkt')
+        parent = Path(path)
         parent.mkdir(parents=True, exist_ok = True)
         data_share.to_csv(parent / f"{tick}.csv")
-    
+        
     except Exception as e:
         logger.exception(e)
 
 def download(start_date='2019-01-01', end_date='2023-03-31', folder='./data/mkt'):
-    
+    symbols = pd.read_csv('./data/us_symbols.csv')
+    args_list = [(folder, start_date, end_date, tick) for tick in symbols.ticker]
     with ProcessPoolExecutor(6) as executor:
-    _ = list(tqdm(executor.map(get_ticker_mkt_data, symbols.ticker), total=len(symbols.ticker)))        
+        _ = list(tqdm(executor.map(get_ticker_mkt_data, args_list), total=len(args_list)))        
     
     
 if __name__ == '__main__':
