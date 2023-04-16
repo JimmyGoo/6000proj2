@@ -24,15 +24,18 @@ def get_ticker_mkt_data(args):
         data_share['share'] = data_share['share'].bfill()
         data_share = data_share.dropna()
         data_share = data_share.loc[start_date:end_date]
+
+        if len(data_share) > 0:
         
-        parent = Path(path)
-        parent.mkdir(parents=True, exist_ok = True)
-        data_share.to_csv(parent / f"{tick}.csv")
+            parent = Path(path)
+            parent.mkdir(parents=True, exist_ok = True)
+            data_share.to_csv(parent / f"{tick}.csv")
         
     except Exception as e:
-        logger.exception(e)
+        # logger.exception(e)
+        pass
 
-def download(start_date='2019-01-01', end_date='2023-03-31', folder='./data/mkt'):
+def download(start_date='2018-06-01', end_date='2023-03-31', folder='./data/mkt'):
     symbols = pd.read_csv('./data/us_symbols.csv')
     args_list = [(folder, start_date, end_date, tick) for tick in symbols.ticker]
     with ProcessPoolExecutor(6) as executor:
