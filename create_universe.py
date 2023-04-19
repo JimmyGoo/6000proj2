@@ -35,6 +35,7 @@ def create_universe(start_date: str = '2018-12-31', end_date: str = '2023-03-31'
     for d in dates:
         logger.info(f"select universe by date {d.strftime('%Y-%m-%d')}")
         select_by_turnover(d.strftime('%Y-%m-%d'), top_k=top_k)
+        
 if __name__ == '__main__':
     fire.Fire(create_universe)
 
