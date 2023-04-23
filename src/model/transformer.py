@@ -4,8 +4,8 @@ from numpy.random import normal
 from typing import Optional, Union, Callable
 
 import tensorflow as tf
-# TODO：我在colab里必须得加上这句话，似乎是由于使用的tensorflow版本是2.x，而代码本身基于tensorflow1.x
 tf.compat.v1.experimental.output_all_intermediates(True)
+
 from tensorflow.keras import layers
 from keras.layers import Dense, Conv1D, Flatten, MaxPooling1D, Dropout, LeakyReLU, LSTM, BatchNormalization
 from keras.layers import Dense, Input, LSTM, Layer, TimeDistributed, Lambda, Activation, Add
@@ -142,20 +142,6 @@ class Transformer:
         self._attn_mode = attn_mode
         self._head_mode = head_mode
 
-    # TODO: 需要 loss function
-    def _build_loss(self, sigma: tf.Tensor) -> Callable:
-
-        def gaussian_likelihood(y_true, y_pred):
-            return tf.reduce_mean(
-                tf.math.log(tf.math.sqrt(2 * math.pi))
-                + tf.math.log(sigma)
-                + tf.math.truediv(
-                    tf.math.square(y_true - y_pred), 2 * tf.math.square(sigma)
-                )
-            )
-
-        return gaussian_likelihood
-
     def build_and_compile(self) -> None:
         inputs = Input(shape=(self._win_len, self._input_dim))
         lstm_out1 = LSTM(self._hidden_dim[0], return_sequences=True)(inputs)
@@ -183,7 +169,6 @@ class Transformer:
 
         model = Model(inputs=inputs, outputs=dense_out)
 
-        # TODO 目前使用的loss func是mse
         model.compile(
             loss='mse',
             metrics=['mse'],
@@ -200,6 +185,5 @@ class Transformer:
     def fit(self, **kwargs) -> None:
         self._model.fit(**kwargs)
 
-    def predict(self, **kwargs):
-        pred = self._model.predict(**kwargs)
-        return pred
+    def predict(self, X_test):
+        return self._model.predict(X_test)

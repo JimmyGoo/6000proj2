@@ -16,19 +16,6 @@ class CNN1D:
         self._kernel_size = kernel_size
         self._dense = dense
 
-    def _build_loss(self, sigma: tf.Tensor):
-        # TODO: build loss func
-        def gaussian_likelihood(y_true, y_pred):
-            return tf.reduce_mean(
-                tf.math.log(tf.math.sqrt(2 * math.pi))
-                + tf.math.log(sigma)
-                + tf.math.truediv(
-                    tf.math.square(y_true - y_pred), 2 * tf.math.square(sigma)
-                )
-            )
-
-        return gaussian_likelihood
-
     def build_and_compile(self) -> None:
         inputs = Input(shape=(self._win_len, self._input_dim))
         conv1 = Conv1D(filters=self._filter[0],
@@ -43,6 +30,7 @@ class CNN1D:
         conv3 = Conv1D(filters=self._filter[2],
                        kernel_size=self._kernel_size[2], padding='same',
                        activation='relu', data_format="channels_last")(maxpool)
+
         x = Flatten()(conv3)
         dense = Dense(self._dense)(x)
         dense = LeakyReLU(alpha=0.01)(dense)
@@ -50,8 +38,6 @@ class CNN1D:
         dense_out = Dense(self._input_dim, activation='relu')(dropout)
 
         model = Model(inputs, dense_out)
-
-        # TODO 改loss func
         model.compile(
             loss='mse',
             metrics=['mse'],
@@ -68,6 +54,5 @@ class CNN1D:
     def fit(self, **kwargs) -> None:
         self._model.fit(**kwargs)
 
-    def predict(self, **kwargs):
-        pred = self._model.predict(**kwargs)
-        return pred
+    def predict(self, X_test):
+        return self._model.predict(X_test)

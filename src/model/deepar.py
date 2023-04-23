@@ -1,7 +1,8 @@
 import numpy as np
 import math
+import pandas as pd
 from numpy.random import normal
-from typing import Optional, Union, Callable
+from typing import Optional, Union, Callable, Tuple
 
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, Input, LSTM, Layer
@@ -12,8 +13,10 @@ from tensorflow.keras import callbacks
 from tensorflow.python.framework.ops import disable_eager_execution
 disable_eager_execution()
 
+## implementation reference https://github.com/arrigonialberto86/deepar
+
 class GaussianLayer(Layer):
-    def __init__(self, input_dim, output_dim, **kwargs):
+    def __init__(self, input_dim: int, output_dim: int, **kwargs) -> None:
         """Init."""
         self._input_dim = input_dim
         self._output_dim = output_dim
@@ -48,13 +51,13 @@ class GaussianLayer(Layer):
         )
         super(GaussianLayer, self).build(input_shape)
 
-    def call(self, x):
+    def call(self, x: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
         """Do the layer computation."""
         # print(x.shape)
         output_mu = K.dot(x, self._kernel_mu) + self._bias_mu
         output_sig = K.dot(x, self._kernel_sigma) + self._bias_sigma
         output_sig_pos = K.log(1 + K.exp(output_sig)) + 1e-06
-        return [output_mu, output_sig_pos]
+        return output_mu, output_sig_pos
 
 class DeepAR:
     def __init__(self, win_len, input_dim, hidden_dim=[256,128]):
@@ -80,12 +83,14 @@ class DeepAR:
 
         inputs = Input(shape=(self._win_len, self._input_dim))
         lstm_out = LSTM(
-            self._hidden_dim[0],
+            int(4 * (1 + math.pow(math.log(self._input_dim), 2))),
+            # self._hidden_dim[0],
             return_sequences=False,
             # dropout=0.1,
         )(inputs)
-        dense_out = Dense(self._hidden_dim[1], activation='relu')(lstm_out)
-        mu, sigma = GaussianLayer(self._hidden_dim[1], self._input_dim, name='gaussian_layer')(dense_out)
+        dense_out_dim = int(4 * (1 + math.log(self._input_dim)))
+        dense_out = Dense(dense_out_dim, activation='relu')(lstm_out)
+        mu, sigma = GaussianLayer(dense_out_dim, self._input_dim, name='gaussian_layer')(dense_out)
 
         model = Model(inputs, mu)
 
@@ -105,7 +110,11 @@ class DeepAR:
     def fit(self, **kwargs) -> None:
         self._model.fit(**kwargs)
 
-    def predict(self, X_test):
+    def predict_mu(self, X_test: pd.DataFrame) -> np.array:
+
+        return self._model.predict(X_test)
+
+    def predict_rand(self, X_test: pd.DataFrame) -> np.array:
 
         get_intermediate = K.function(
             inputs=[self._model.input],
