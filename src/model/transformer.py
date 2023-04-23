@@ -200,18 +200,6 @@ class Transformer:
     def fit(self, **kwargs) -> None:
         self._model.fit(**kwargs)
 
-    def predict(self, X_test):
-        get_intermediate = K.function(
-            inputs=[self._model.input],
-            outputs=self._model.get_layer('gaussian_layer').output,
-        )
-
-        output = get_intermediate([X_test])
-        y_pred = []
-        for mu, sigma in zip(output[0].reshape(-1), output[1].reshape(-1)):
-            sample = normal(
-                loc=mu, scale=sigma, size=1
-            )
-            y_pred.append(sample)
-
-        return np.array(y_pred).reshape((-1, self._input_dim))
+    def predict(self, **kwargs):
+        pred = self._model.predict(**kwargs)
+        return pred
