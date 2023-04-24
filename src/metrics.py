@@ -37,7 +37,10 @@ def generate_report(preds: List[pd.DataFrame], gt: pd.DataFrame, names: List[str
 
         corr_tickers = []
         for i in range(pred.shape[1]):
-            corr_tickers.append(np.corrcoef([pred[:,i], gt[:,i]])[0,1])
+            if np.cov([pred[:,i], gt[:,i]])[0,1] == 0:
+                corr_tickers.append(0)
+            else:
+                corr_tickers.append(np.corrcoef([pred[:,i], gt[:,i]])[0,1])
         avg_corr = np.mean(corr_tickers)
 
         nd = np.mean(np.clip(np.abs(pred - gt) / (np.abs(gt) + 1e-6), 0, 2.0).flatten())
