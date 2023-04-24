@@ -7,6 +7,7 @@ from tensorflow.keras import layers
 from keras.layers import Dense, Conv1D, Flatten, MaxPooling1D, Dropout, LeakyReLU, Input, Layer
 from tensorflow.keras.models import Model
 
+# The model structure refers to https://www.kaggle.com/code/yzgast/cnn-1d-for-stock-prediction/notebook
 
 class CNN1D:
     def __init__(self, win_len, input_dim, filter=[32, 64, 128], kernel_size=[1, 1, 1], dense=256):
