@@ -17,7 +17,7 @@ def plot_mse(preds: List[pd.DataFrame], gt: pd.DataFrame, names: List[str], inde
         mse_by_time = ((pred - gt) ** 2).mean(axis=1)
         mse_df[names[i]] = mse_by_time
         mse_df.index = pd.to_datetime(mse_df.index)
-    
+    sns.set(rc={'figure.figsize':(15,10)})
     plot = sns.lineplot(mse_df)
 
     return plot, mse_df

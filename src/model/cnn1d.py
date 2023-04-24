@@ -36,7 +36,7 @@ class CNN1D:
         dense = Dense(self._dense)(x)
         dense = LeakyReLU(alpha=0.01)(dense)
         dropout = Dropout(0.8)(dense)
-        dense_out = Dense(self._input_dim, activation='relu')(dropout)
+        dense_out = Dense(self._input_dim)(dropout)
 
         model = Model(inputs, dense_out)
         model.compile(
