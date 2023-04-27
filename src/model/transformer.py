@@ -132,7 +132,7 @@ class MultiHeadAttention():
 
 
 class Transformer:
-    def __init__(self, win_len, input_dim, hidden_dim=[128, 64], attn_mode=0, head_mode=0):
+    def __init__(self, win_len, input_dim, hidden_dim=[480, 128], attn_mode=0, head_mode=0):
         self.name = 'Transformer'
         self._win_len = win_len
         self._input_dim = input_dim
@@ -144,8 +144,8 @@ class Transformer:
 
     def build_and_compile(self) -> None:
         inputs = Input(shape=(self._win_len, self._input_dim))
-        lstm_out1 = LSTM(self._hidden_dim[0], return_sequences=True)(inputs)
-        x = LSTM(self._hidden_dim[1], return_sequences=True)(lstm_out1)
+        x = LSTM(self._hidden_dim[0], return_sequences=True)(inputs)
+        # x = LSTM(self._hidden_dim[1], return_sequences=True)(x)
         if self._attn_mode == 1:
             x, slf_attn = MultiHeadAttention(num_head=3, dim_model=300,
                                              dim_key=self._hidden_dim[1],
