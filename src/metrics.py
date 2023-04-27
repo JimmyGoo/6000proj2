@@ -19,7 +19,7 @@ def plot_mse(preds: List[pd.DataFrame], gt: pd.DataFrame, names: List[str], inde
         mse_df.index = pd.to_datetime(mse_df.index)
     sns.set(rc={'figure.figsize':(15,10)})
     plot = sns.lineplot(mse_df)
-
+    plot.set(ylim=(0,0.03))
     return plot, mse_df
 
 
